@@ -5,6 +5,8 @@ import com.livros.literalura.repositorio.LivroRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class LivroService {
     @Autowired
@@ -14,7 +16,7 @@ public class LivroService {
         return livroRepositorio.save(livro);
     }
 
-    public Livro findByTitulo(String nome){
+    public Optional<Livro> findByTitulo(String nome){
         return livroRepositorio.findByTitulo(nome);
     }
 }

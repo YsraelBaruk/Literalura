@@ -7,9 +7,9 @@ import com.livros.literalura.service.AutorService;
 import com.livros.literalura.service.ConsumoApi;
 import com.livros.literalura.service.Conversor;
 import com.livros.literalura.service.LivroService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class Principal {
@@ -17,16 +17,19 @@ public class Principal {
     private final String ENDERECO = "https://gutendex.com/books/?search=";
     private ConsumoApi consumoApi = new ConsumoApi();
     private Conversor conversor = new Conversor();
-    @Autowired
     private LivroService livroService;
-    @Autowired
     private AutorService autorService;
+
+    public Principal(AutorService autorService, LivroService livroService) {
+        this.livroService = livroService;
+        this.autorService = autorService;
+    }
 
     public void exibeMenu(){
         var opcao = -1;
         while (opcao != 0){
             String menu = """
-                1 - Buscar livro pelo título
+                \n1 - Buscar livro pelo título
                 2 - Listar livros registrados
                 3 - Listar autores registradores
                 4 - Listar autores vivos em um determinado ano
@@ -48,27 +51,26 @@ public class Principal {
     }
 
     public void buscarLivroNome() {
+        System.out.println("Digite o nome do livro: ");
+        var nomeLivro = digitar.nextLine();
+        var json = consumoApi.busca(ENDERECO+nomeLivro.replaceAll(" ", "%20"));
+        System.out.println(json);
+        LivroDTO livroDTO = conversor.converteDados(json);
+        System.out.println(livroDTO);
         try {
-            System.out.println("Digite o nome do livro: ");
-            var nomeLivro = digitar.nextLine();
-            var json = consumoApi.busca(ENDERECO+nomeLivro.replaceAll(" ", "%20"));
-            System.out.println(json);
-            LivroDTO livroDTO = conversor.converteDados(json);
-            System.out.println(livroDTO);
-            var livroNome = livroService.findByTitulo(livroDTO.title());
-            if (livroNome == null){
-                List<Autor> autores = livroDTO.authors().stream().map(Autor::new).toList();
-                var autor = autorService.findByNome(autores.getFirst().getNome());
-                if (autor.getNome() == null){
-                    autorService.salvar(autores.getFirst());
-                    System.out.println("Novo autor no banco de dados");
-                }
-                Livro livro = new Livro(livroDTO, autor);
-                System.out.println(livro);
-                System.out.println("Novo livro no banco de dados");
-            } else {
-                System.out.println("Livro já existe no banco de dados.");
+            List<Autor> autores = livroDTO.authors().stream().map(Autor::new).toList();
+            var autor = autores.getFirst();
+            Livro livro = new Livro(livroDTO, autor);
+            System.out.println(livro);
+            Optional<Autor> autorPresent = autorService.findByNome(autor.getNome());
+            if (!(autorPresent.isPresent())){
+                autorService.salvar(autor);
             }
+            Optional<Livro> livroPresent = livroService.findByTitulo(livro.getTitulo());
+            if (!(livroPresent.isPresent())){
+                livroService.salvar(livro);
+            }
+            System.out.println(livro);
         } catch (Exception e){
             System.out.println(e.getMessage());
         }
