@@ -13,7 +13,7 @@ public class Livro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String titulo;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "autor_id")
     private Autor autor;
     @ElementCollection(fetch = FetchType.EAGER)
@@ -22,11 +22,20 @@ public class Livro {
     private List<String> idioma;
     private Integer download;
 
+    public Livro(){}
+
     public Livro(LivroDTO livroDTO, Autor autor) {
         this.titulo=livroDTO.title();
         this.autor=autor;
         this.idioma=livroDTO.languages();
         this.download=livroDTO.download_count();
+    }
+
+    public Livro(Livro livro) {
+        this.titulo=livro.getTitulo();
+        this.autor=livro.getAutor();
+        this.idioma=livro.getIdioma();
+        this.download=livro.getDownload();
     }
 
     public Long getId() {
@@ -72,7 +81,7 @@ public class Livro {
     @Override
     public String toString() {
         return "\nTítulo: "+titulo
-                +"\nAutor: "+(autor != null ? autor.getNome() : "N/A")
+                +"\nAutor: "+autor.getNome()
                 +"\nIdioma: "+idioma
                 +"\nNúmero de downloads: "+download+"\n";
     }

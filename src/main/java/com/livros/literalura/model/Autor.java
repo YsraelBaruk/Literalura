@@ -1,10 +1,12 @@
 package com.livros.literalura.model;
 
-import com.ctc.wstx.shaded.msv_core.util.LightStack;
 import com.livros.literalura.dto.AutorDTO;
+import com.livros.literalura.dto.LivroDTO;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "autores")
@@ -16,15 +18,33 @@ public class Autor {
     private Integer ano_nasc;
     private Integer ano_fale;
 
-    @OneToMany(mappedBy = "autor", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "autor", fetch = FetchType.EAGER)
     private List<Livro> livros;
 
     public Autor(){}
 
-    public Autor(AutorDTO autorDTO) {
-        this.nome= autorDTO.name();
-        this.ano_nasc= autorDTO.birth_year();
-        this.ano_fale= autorDTO.death_year();
+//    public Autor(AutorDTO autorDTO) {
+//        this.nome= autorDTO.name();
+//        this.ano_nasc= autorDTO.birth_year();
+//        this.ano_fale= autorDTO.death_year();
+//    }
+
+    public Autor(Autor autor) {
+        this.nome=autor.getNome();
+        this.ano_nasc=autor.getAno_fale();
+        this.ano_fale=autor.getAno_nasc();
+    }
+
+    public Autor(AutorDTO autor, LivroDTO livroDTO) {
+        this.nome= autor.name();
+        this.ano_nasc= autor.birth_year();
+        this.ano_fale= autor.death_year();
+        List<Livro> livro = new ArrayList<>();
+        livro.stream().map(Livro::new).collect(Collectors.toList());
+        this.livros=livro;
+    }
+
+    public Autor(String nome, Integer anoNasc, Integer anoFale) {
     }
 
     public Long getId() {
@@ -59,8 +79,19 @@ public class Autor {
         this.ano_fale = ano_fale;
     }
 
+    public List<Livro> getLivros() {
+        return livros;
+    }
+
+    public void setLivros(List<Livro> livros) {
+        this.livros = livros;
+    }
+
     @Override
     public String toString() {
-        return "Autor: "+nome+" ("+ano_nasc+" - "+ano_fale+")";
+        return "\n---Autor---"+
+                "\nNome: "+nome+
+                "\nAno de nascimento: "+ano_nasc+
+                "\nAno de falecimento: "+ano_fale;
     }
 }
