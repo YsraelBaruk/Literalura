@@ -1,5 +1,4 @@
 # Desafio LiterAlura
-<hr/>
 
 Neste de desafio de programação foi proposto construir um catálogo de livros: o **LiterAlura**, Foi aplicado: 
 - Solicitações a [API Guntendex](https://gutendex.com).
